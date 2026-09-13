@@ -8,7 +8,6 @@ import { CategoryChartComponent } from './components/category-chart/category-cha
 import { TableComponent } from '../../shared/components/table/table.component';
 import { CardComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '../../shared/components/card/card.component';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
-import { ButtonComponent } from '../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +15,6 @@ import { ButtonComponent } from '../../shared/components/button/button.component
   imports: [
     CommonModule,
     RouterModule,
-    ButtonComponent,
     StatCardComponent,
     RevenueChartComponent,
     CategoryChartComponent,
@@ -33,30 +31,6 @@ import { ButtonComponent } from '../../shared/components/button/button.component
         <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
       </div>
 
-      <!-- Tech Stack Welcome Card -->
-      <app-card class="block mb-6" className="bg-gradient-to-r from-primary/10 via-card to-card border-border">
-        <app-card-content class="p-6">
-          <div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-            <div>
-              <h3 class="text-xl font-bold tracking-tight mb-2">Modern Angular Architecture</h3>
-              <p class="text-muted-foreground text-sm max-w-2xl">
-                Built to scale. This dashboard leverages Angular 22's newest primitives including Signals, Standalone Components, and new Control Flow syntax, perfectly paired with Tailwind CSS utility classes and component design.
-              </p>
-              <div class="mt-4">
-                <app-button variant="default" size="sm" routerLink="/documentation" class="inline-flex cursor-pointer transition-transform hover:translate-x-1">
-                  View Documentation &rarr;
-                </app-button>
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <span class="px-3 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-semibold">Angular v22</span>
-              <span class="px-3 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-semibold">Tailwind CSS</span>
-              <span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">Signals State</span>
-            </div>
-          </div>
-        </app-card-content>
-      </app-card>
-
       <!-- KPI Cards -->
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         @for (kpi of dataService.kpis(); track kpi.id) {
@@ -66,8 +40,8 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 
       <!-- Charts -->
       <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
-        <app-revenue-chart class="lg:col-span-2 block" [data]="dataService.activityData()"></app-revenue-chart>
-        <app-category-chart class="block"></app-category-chart>
+        <app-revenue-chart class="lg:col-span-2 block min-w-0" [data]="dataService.activityData()"></app-revenue-chart>
+        <app-category-chart class="block min-w-0"></app-category-chart>
       </div>
 
       <!-- Recent Transactions Table -->

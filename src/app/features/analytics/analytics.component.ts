@@ -105,45 +105,45 @@ type TimeRange = '7d' | '30d' | '90d';
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-7 gap-6">
-        <app-card class="lg:col-span-4 block h-full" className="h-full flex flex-col">
+        <app-card class="lg:col-span-4 block h-full min-w-0" className="h-full flex flex-col">
           <app-card-header>
             <app-card-title>User Engagement by Channel</app-card-title>
             <app-card-description>Comparison of acquired vs active users per marketing channel.</app-card-description>
           </app-card-header>
           <app-card-content class="pt-2 pl-2 flex-1">
-            <canvas baseChart [data]="barChartData()" [options]="barChartOptions()" [type]="'bar'" style="width: 100%; height: 300px; display: block;"></canvas>
+            <div class="relative w-full overflow-hidden"><canvas baseChart [data]="barChartData()" [options]="barChartOptions()" [type]="'bar'" style="width: 100%; height: 300px; display: block;"></canvas></div>
           </app-card-content>
         </app-card>
 
-        <app-card class="lg:col-span-3 block h-full" className="h-full flex flex-col">
+        <app-card class="lg:col-span-3 block h-full min-w-0" className="h-full flex flex-col">
           <app-card-header>
             <app-card-title>Audience Interests</app-card-title>
             <app-card-description>Demographic radar showing user affinities.</app-card-description>
           </app-card-header>
           <app-card-content class="flex items-center justify-center pt-2 flex-1">
-            <canvas baseChart [data]="radarChartData()" [options]="radarChartOptions()" [type]="'radar'" style="width: 100%; height: 300px; display: block;"></canvas>
+            <div class="relative w-full overflow-hidden"><canvas baseChart [data]="radarChartData()" [options]="radarChartOptions()" [type]="'radar'" style="width: 100%; height: 300px; display: block;"></canvas></div>
           </app-card-content>
         </app-card>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-7 gap-6">
-        <app-card class="lg:col-span-4 block h-full" className="h-full flex flex-col">
+        <app-card class="lg:col-span-4 block h-full min-w-0" className="h-full flex flex-col">
           <app-card-header>
             <app-card-title>Activity</app-card-title>
             <app-card-description>User session concentration by day and time.</app-card-description>
           </app-card-header>
           <app-card-content class="pt-2 pl-2 flex-1">
-            <canvas baseChart [data]="lineChartData()" [options]="lineChartOptions()" [type]="'line'" style="width: 100%; height: 300px; display: block;"></canvas>
+            <div class="relative w-full overflow-hidden"><canvas baseChart [data]="lineChartData()" [options]="lineChartOptions()" [type]="'line'" style="width: 100%; height: 300px; display: block;"></canvas></div>
           </app-card-content>
         </app-card>
 
-        <app-card class="lg:col-span-3 block h-full" className="h-full flex flex-col">
+        <app-card class="lg:col-span-3 block h-full min-w-0" className="h-full flex flex-col">
           <app-card-header>
             <app-card-title>Goal Completions</app-card-title>
             <app-card-description>Multi-goal tracking against target metrics.</app-card-description>
           </app-card-header>
           <app-card-content class="flex items-center justify-center pt-2 flex-1">
-            <canvas baseChart [data]="polarChartData()" [options]="polarChartOptions()" [type]="'polarArea'" style="width: 100%; height: 300px; display: block;"></canvas>
+            <div class="relative w-full overflow-hidden"><canvas baseChart [data]="polarChartData()" [options]="polarChartOptions()" [type]="'polarArea'" style="width: 100%; height: 300px; display: block;"></canvas></div>
           </app-card-content>
         </app-card>
       </div>
