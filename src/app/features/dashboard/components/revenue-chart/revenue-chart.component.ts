@@ -16,6 +16,7 @@ import { ThemeService } from '../../../../core/services/theme.service';
         <app-card-title>Revenue Overview</app-card-title>
       </app-card-header>
       <app-card-content className="flex-1">
+         <div class="relative w-full overflow-hidden">
          <canvas baseChart
           [type]="'line'"
           [data]="chartData()"
@@ -23,6 +24,7 @@ import { ThemeService } from '../../../../core/services/theme.service';
           [legend]="false"
           style="width: 100%; height: 300px; display: block;">
         </canvas>
+         </div>
       </app-card-content>
     </app-card>
   `

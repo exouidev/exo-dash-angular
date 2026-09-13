@@ -19,6 +19,24 @@ import { CardComponent, CardHeaderComponent, CardTitleComponent, CardContentComp
         </p>
       </div>
 
+      <!-- Official Docs Callout -->
+      <div class="rounded-lg border border-primary/20 bg-primary/5 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <h3 class="text-lg font-semibold text-foreground flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Complete Official Documentation
+          </h3>
+          <p class="text-sm text-muted-foreground">
+            Looking for highly detailed component usage, styling recipes, and full API references? Check out the official web portal.
+          </p>
+        </div>
+        <a href="https://exoui.dev/documentation" target="_blank" rel="noopener noreferrer" 
+           class="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2 shadow-sm font-semibold">
+          Explore Exo UI Docs
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 h-4 w-4"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        </a>
+      </div>
+
       <!-- Prerequisites -->
       <app-card class="block">
         <app-card-header>

@@ -15,12 +15,14 @@ import { ThemeService } from '../../../../core/services/theme.service';
         <app-card-title>Traffic Sources</app-card-title>
       </app-card-header>
       <app-card-content className="flex flex-col justify-center flex-1">
+         <div class="relative w-full overflow-hidden">
          <canvas baseChart
           [type]="'radar'"
           [data]="chartData()"
           [options]="chartOptions()"
           style="width: 100%; height: 300px; display: block;">
         </canvas>
+         </div>
       </app-card-content>
     </app-card>
   `
