@@ -1,3 +1,4 @@
+import { ThemeService } from '../../core/services/theme.service';
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -61,7 +62,7 @@ interface NavGroup {
 
             @for (link of group.items; track link.label) {
               @if (!link.children) {
-                <a [routerLink]="link.isPro ? null : link.href" (click)="handleMenuClick($event, link.isPro)" routerLinkActive="bg-sidebar-accent text-sidebar-accent-foreground" [routerLinkActiveOptions]="{exact: true}"
+                <a [routerLink]="link.isPro ? null : link.href" (click)="handleMenuClick($event, link.isPro, link.label)" routerLinkActive="bg-sidebar-accent text-sidebar-accent-foreground" [routerLinkActiveOptions]="{exact: true}"
                   class="flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2 text-sidebar-foreground/70 transition-all hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
                   <svg [lucideIcon]="link.icon" class="h-4 w-4"></svg>
                   @if (!sidebarService.isCollapsed()) {
@@ -94,7 +95,7 @@ interface NavGroup {
                   @if (!sidebarService.isCollapsed() && isMenuExpanded(link.label)) {
                     <div class="grid gap-1 pl-9 pr-2">
                       @for (child of link.children; track child.href) {
-                        <a [routerLink]="child.isPro ? null : child.href" (click)="handleMenuClick($event, child.isPro)" routerLinkActive="text-foreground"
+                        <a [routerLink]="child.isPro ? null : child.href" (click)="handleMenuClick($event, child.isPro, child.label)" routerLinkActive="text-foreground"
                            class="flex items-center rounded-md px-2 py-1.5 text-sm cursor-pointer text-sidebar-foreground/70 transition-all hover:text-sidebar-foreground hover:bg-sidebar-accent/50 whitespace-nowrap">
                           <span class="flex-1">{{ child.label }}</span>
                           @if (child.isPro) {
@@ -175,23 +176,68 @@ interface NavGroup {
     </aside>
     <!-- PRO PAYWALL MODAL -->
     @if (showProModal()) {
-      <div class="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 text-left" (click)="showProModal.set(false)">
-        <div class="bg-card w-full max-w-md rounded-xl border shadow-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" (click)="$event.stopPropagation()">
-          
-          <div class="p-6 text-center space-y-4 shadow-sm border-b">
-            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock text-primary"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <div class="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 text-left" (click)="showProModal.set(null); previewTheme.set(null)">
+        <div class="bg-card w-full max-w-[800px] rounded-xl border shadow-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200" (click)="$event.stopPropagation()">
+          <div class="flex flex-col md:flex-row relative">
+            
+            <!-- Image Preview Area -->
+            <div class="w-full md:w-3/5 bg-accent/20 flex items-center justify-center relative overflow-hidden hidden md:flex border-r border-border">
+              <img 
+                [src]="'/screenshots/' + showProModal() + '-' + displayTheme + '.jpg'" 
+                (error)="hideImage($event)"
+                [alt]="showProModal() + ' preview'"
+                class="w-full h-full object-cover object-left-top shadow-sm max-h-[500px]"
+              />
+              
+              <!-- Theme Toggle Overlay -->
+              <div class="absolute top-3 right-3 bg-background/90 backdrop-blur-sm border rounded-lg p-1 shadow-sm flex items-center gap-1 z-10">
+                <button 
+                  (click)="previewTheme.set('light')"
+                  class="p-1.5 rounded-md flex items-center justify-center transition-colors"
+                  [class.bg-primary]="displayTheme === 'light'"
+                  [class.text-primary-foreground]="displayTheme === 'light'"
+                  [class.shadow-sm]="displayTheme === 'light'"
+                  [class.text-foreground-70]="displayTheme !== 'light'"
+                  [class.hover:bg-muted]="displayTheme !== 'light'"
+                  title="Light Mode"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                </button>
+                <button 
+                  (click)="previewTheme.set('dark')"
+                  class="p-1.5 rounded-md flex items-center justify-center transition-colors"
+                  [class.bg-primary]="displayTheme === 'dark'"
+                  [class.text-primary-foreground]="displayTheme === 'dark'"
+                  [class.shadow-sm]="displayTheme === 'dark'"
+                  [class.text-foreground-70]="displayTheme !== 'dark'"
+                  [class.hover:bg-muted]="displayTheme !== 'dark'"
+                  title="Dark Mode"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="w-full md:w-2/5 flex flex-col items-center justify-center p-8 text-center space-y-4">
+              <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div>
+                <h2 class="text-xl font-bold tracking-tight mb-2 text-foreground capitalize">{{ showProModal()?.replace('-', ' ') }} Locked</h2>
+                <p class="text-sm text-foreground/70 mb-4">Unlock this feature and access advanced dashboards, and 10+ premium applications with Exo UI Pro.</p>
+                
+                <div class="flex flex-col gap-2 mt-6 w-full">
+                  <a href="https://exoui.dev" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 text-sm font-bold bg-primary text-primary-foreground rounded-md shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                     Unlock Exo UI Pro <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                  </a>
+                  <button class="w-full py-2.5 px-4 text-sm font-medium border border-border hover:bg-muted rounded-md transition-colors cursor-pointer" (click)="showProModal.set(null); previewTheme.set(null)">
+                    Maybe Later
+                  </button>
+                </div>
+              </div>
             </div>
             
-            <div>
-              <h2 class="text-xl font-bold tracking-tight mb-2 text-foreground">Pro Feature Locked</h2>
-              <p class="text-sm text-foreground/70">Unlock this feature and access advanced dashboards, and 10+ premium applications with Exo UI Pro.</p>
-            </div>
-          </div>
-          
-          <div class="p-4 bg-muted/50 flex justify-end gap-2 text-foreground">
-            <button class="px-4 py-2 text-sm font-medium border hover:bg-black/5 rounded-md transition-colors cursor-pointer" (click)="showProModal.set(false)">Close</button>
-            <a href="https://exoui.dev" target="_blank" class="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md shadow-sm hover:opacity-90 transition-opacity flex items-center">Unlock Exo UI Pro</a>
           </div>
         </div>
       </div>
@@ -273,22 +319,32 @@ interface NavGroup {
 
 })
 export class SidebarComponent {
-  showProModal = signal(false);
+  showProModal = signal<string | null>(null);
   showFeaturesModal = signal(false);
+  previewTheme = signal<'light' | 'dark' | null>(null);
+  themeService = inject(ThemeService);
 
-  handleMenuClick(event: Event, isPro?: boolean) {
-    if (isPro) {
+  get displayTheme() {
+    return this.previewTheme() || (this.themeService.currentTheme() === 'dark' ? 'dark' : 'light');
+  }
+
+  hideImage(event: Event) { (event.target as HTMLElement).style.display = 'none'; }
+
+  handleMenuClick(event: Event, isPro?: boolean, label?: string) {
+    if (isPro && label) {
       event.preventDefault();
       event.stopPropagation();
-      this.showProModal.set(true);
+      this.previewTheme.set(null);
+      this.showProModal.set(label.toLowerCase().replace(/ /g, '-'));
     }
   }
 
-  handleMobileMenuClick(event: Event, isPro?: boolean) {
-    if (isPro) {
+  handleMobileMenuClick(event: Event, isPro?: boolean, label?: string) {
+    if (isPro && label) {
       event.preventDefault();
       event.stopPropagation();
-      this.showProModal.set(true);
+      this.previewTheme.set(null);
+      this.showProModal.set(label.toLowerCase().replace(/ /g, '-'));
     } else {
        this.sidebarService.setMobileOpen(false);
     }
