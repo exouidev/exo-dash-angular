@@ -12,18 +12,18 @@ import { signal } from '@angular/core';
   standalone: true,
   imports: [CommonModule, RouterModule, SidebarComponent, HeaderComponent, ToasterComponent],
   template: `
-    <div class="flex min-h-screen w-full bg-muted/40">
+    <div class="flex h-screen w-full overflow-hidden bg-muted/40">
       <app-sidebar></app-sidebar>
 
       <div class="flex flex-col flex-1 min-w-0 transition-all duration-300"
         [class.md:pl-16]="sidebarService.isCollapsed()"
         [class.md:pl-64]="!sidebarService.isCollapsed()">
-        
+
         <div class="sticky top-0 z-40 w-full flex flex-col shadow-sm">
-          
+
           <app-header></app-header>
         </div>
-        <main class="flex-1 p-4 sm:p-6 w-full min-w-0">
+        <main class="flex-1 p-4 sm:p-6 w-full min-w-0 overflow-y-auto flex flex-col">
           <router-outlet></router-outlet>
         </main>
           <app-toaster></app-toaster>

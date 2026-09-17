@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
           <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
             @for (col of columns(); track col.key) {
               <th 
-                class="h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 cursor-pointer hover:text-foreground"
+                [class]="'h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 cursor-pointer hover:text-foreground ' + (col.hideOnMobile ? 'hidden md:table-cell ' : '') + (col.hideOnSmall ? 'hidden sm:table-cell ' : '')"
                 (click)="sort(col.key)"
               >
                 <div class="flex items-center gap-1">
@@ -29,7 +29,7 @@ import { CommonModule } from '@angular/common';
           @for (row of paginatedData(); track row.id) {
             <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
               @for (col of columns(); track col.key) {
-                <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                <td [class]="'p-4 align-middle [&:has([role=checkbox])]:pr-0 ' + (col.hideOnMobile ? 'hidden md:table-cell ' : '') + (col.hideOnSmall ? 'hidden sm:table-cell ' : '')">
                   <ng-container *ngTemplateOutlet="cellTemplate() ? cellTemplate() : defaultCell; context: { $implicit: row, col: col }"></ng-container>
                   <ng-template #defaultCell>
                     {{ row[col.key] }}
@@ -76,7 +76,7 @@ import { CommonModule } from '@angular/common';
 })
 export class TableComponent {
   data = input<any[]>([]);
-  columns = input<{key: string, label: string}[]>([]);
+  columns = input<{key: string, label: string, hideOnMobile?: boolean, hideOnSmall?: boolean}[]>([]);
   searchQuery = input<string>('');
   pageSize = input<number>(5);
   

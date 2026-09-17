@@ -357,9 +357,9 @@ export class ProductsComponent {
   columns = [
     { key: 'product', label: 'Product' },
     { key: 'status', label: 'Status' },
-    { key: 'category', label: 'Category' },
+    { key: 'category', label: 'Category', hideOnMobile: true },
     { key: 'price', label: 'Price' },
-    { key: 'stock', label: 'Inventory' },
+    { key: 'stock', label: 'Inventory', hideOnSmall: true },
     { key: 'actions', label: 'Actions' }
   ];
 
