@@ -230,6 +230,7 @@ export class SidebarComponent {
             { label: 'Forgotten Password', href: '/auth/forgot-password' }
           ]
         },
+        { label: 'Settings', href: '/settings', icon: 'settings' },
         { label: 'Documentation', href: '/documentation', icon: 'file-text' }
       ]
     }
