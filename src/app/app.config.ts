@@ -4,6 +4,8 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import {
   provideLucideIcons,
+  LucideSparkles,
+  LucideExternalLink,
   LucideLayoutDashboard,
   LucideSettings,
   LucideUsers,
@@ -96,6 +98,8 @@ export const appConfig: ApplicationConfig = {
     provideCharts(withDefaultRegisterables()),
     provideRouter(routes, withComponentInputBinding()),
     provideLucideIcons(
+    LucideSparkles,
+    LucideExternalLink,
       LucideLayoutDashboard,
       LucideSettings,
       LucideUsers,
