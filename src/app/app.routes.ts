@@ -84,6 +84,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/products/products.component').then(m => m.ProductsComponent)
       },
       {
+        path: 'settings',
+        loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
         path: 'pro-components',
         loadComponent: () => import('./features/pro-components/pro-components.component').then(m => m.ProComponentsComponent)
       },
