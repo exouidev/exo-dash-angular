@@ -1,4 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { Observable, of, delay } from 'rxjs';
+import { MOCK_USERS } from './user-mock-data';
 
 export interface User {
   id: string;
@@ -14,30 +16,36 @@ export interface User {
   providedIn: 'root'
 })
 export class UserService {
-  readonly users = signal<User[]>([
-    { id: '1', name: 'Alice Freeman', email: 'alice.f@example.com', role: 'Admin', status: 'Active', lastActivity: 'Just now', avatar: 'AF' },
-    { id: '2', name: 'Bob Smith', email: 'bsmith@example.com', role: 'Manager', status: 'Offline', lastActivity: '2 hours ago', avatar: 'BS' },
-    { id: '3', name: 'Catherine Jenkins', email: 'cathy.j@example.com', role: 'Member', status: 'Pending', lastActivity: 'Never', avatar: 'CJ' },
-    { id: '4', name: 'David Lee', email: 'david.l@example.com', role: 'Member', status: 'Active', lastActivity: '5 mins ago', avatar: 'DL' },
-    { id: '5', name: 'Eva Morales', email: 'eva.m@example.com', role: 'Manager', status: 'Active', lastActivity: '1 hour ago', avatar: 'EM' },
-    { id: '6', name: 'Frank Wright', email: 'frank.w@example.com', role: 'Member', status: 'Offline', lastActivity: '3 days ago', avatar: 'FW' },
-    { id: '7', name: 'Grace Taylor', email: 'grace.t@example.com', role: 'Member', status: 'Active', lastActivity: '15 mins ago', avatar: 'GT' },
-    { id: '8', name: 'Henry Chen', email: 'hchen8@example.com', role: 'Member', status: 'Pending', lastActivity: 'Never', avatar: 'HC' },
-  ]);
+  private usersData = [...MOCK_USERS];
 
-  readonly activeUsersCount = computed(() => this.users().filter(u => u.status === 'Active').length);
-  readonly totalUsersCount = computed(() => this.users().length);
-
-
-  addUser(user: User) {
-    this.users.update(list => [user, ...list]);
+  getUsers(): Observable<User[]> {
+    return of([...this.usersData]).pipe(delay(350));
   }
 
-  updateUser(user: User) {
-    this.users.update(list => list.map(u => u.id === user.id ? user : u));
+  addUser(user: User): Observable<User> {
+    this.usersData = [user, ...this.usersData];
+    return of(user).pipe(delay(200));
   }
 
-  deleteUser(id: string) {
-    this.users.update(users => users.filter(u => u.id !== id));
+  updateUser(user: User): Observable<User> {
+    let updated: User | undefined;
+    this.usersData = this.usersData.map(u => {
+      if (u.id === user.id) {
+        updated = user;
+        return updated;
+      }
+      return u;
+    });
+
+    if (!updated) {
+      throw new Error('User not found');
+    }
+
+    return of(updated).pipe(delay(200));
+  }
+
+  deleteUser(id: string): Observable<boolean> {
+    this.usersData = this.usersData.filter(u => u.id !== id);
+    return of(true).pipe(delay(200));
   }
 }

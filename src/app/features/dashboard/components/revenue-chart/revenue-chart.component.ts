@@ -1,5 +1,6 @@
 import { Component, computed, effect, input, ViewChild, inject, QueryList, ViewChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions, ChartType } from 'chart.js';
 import { CardComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent } from '../../../../shared/components/card/card.component';
@@ -9,7 +10,7 @@ import { ThemeService } from '../../../../core/services/theme.service';
 @Component({
   selector: 'app-revenue-chart',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective, CardComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent],
+  imports: [CommonModule, BaseChartDirective, SkeletonComponent, CardComponent, CardHeaderComponent, CardTitleComponent, CardContentComponent],
   template: `
     <app-card className="h-full flex flex-col" class="h-full block">
       <app-card-header>
@@ -17,13 +18,17 @@ import { ThemeService } from '../../../../core/services/theme.service';
       </app-card-header>
       <app-card-content className="flex-1">
          <div class="relative w-full overflow-hidden">
-         <canvas baseChart
-          [type]="'line'"
-          [data]="chartData()"
-          [options]="chartOptions()"
-          [legend]="false"
-          style="width: 100%; height: 300px; display: block;">
-        </canvas>
+         @if (isLoading()) {
+           <app-skeleton height="300px" width="100%"></app-skeleton>
+         } @else {
+           <canvas baseChart
+            [type]="'line'"
+            [data]="chartData()"
+            [options]="chartOptions()"
+            [legend]="false"
+            style="width: 100%; height: 300px; display: block;">
+          </canvas>
+         }
          </div>
       </app-card-content>
     </app-card>
@@ -31,6 +36,7 @@ import { ThemeService } from '../../../../core/services/theme.service';
 })
 export class RevenueChartComponent {
   data = input.required<ActivityData[]>();
+  isLoading = input<boolean>(false);
   themeService = inject(ThemeService);
   
   @ViewChildren(BaseChartDirective) charts?: QueryList<BaseChartDirective>;
