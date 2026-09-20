@@ -6,7 +6,7 @@ import { signal } from '@angular/core';
   standalone: true,
   imports: [RouterModule],
   template: `
-    <div class="flex min-h-screen grid-cols-2 lg:grid w-full pt-9">
+    <div class="flex min-h-screen grid-cols-2 lg:grid w-full">
 
       
 

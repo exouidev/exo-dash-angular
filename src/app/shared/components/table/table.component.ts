@@ -1,10 +1,12 @@
 import { Component, input, computed, signal, TemplateRef, contentChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SkeletonComponent } from '../skeleton/skeleton.component';
+
 
 @Component({
   selector: 'app-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SkeletonComponent],
   template: `
     <div class="w-full relative overflow-auto rounded-md border">
       <table class="w-full caption-bottom text-sm">
@@ -26,23 +28,35 @@ import { CommonModule } from '@angular/common';
           </tr>
         </thead>
         <tbody class="[&_tr:last-child]:border-0">
-          @for (row of paginatedData(); track row.id) {
-            <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-              @for (col of columns(); track col.key) {
-                <td [class]="'p-4 align-middle [&:has([role=checkbox])]:pr-0 ' + (col.hideOnMobile ? 'hidden md:table-cell ' : '') + (col.hideOnSmall ? 'hidden sm:table-cell ' : '')">
-                  <ng-container *ngTemplateOutlet="cellTemplate() ? cellTemplate() : defaultCell; context: { $implicit: row, col: col }"></ng-container>
-                  <ng-template #defaultCell>
-                    {{ row[col.key] }}
-                  </ng-template>
+          @if (isLoading()) {
+            @for (i of skeletonRows(); track i) {
+              <tr class="border-b">
+                @for (col of columns(); track col.key) {
+                  <td [class]="'p-4 align-middle ' + (col.hideOnMobile ? 'hidden md:table-cell ' : '') + (col.hideOnSmall ? 'hidden sm:table-cell ' : '')">
+                    <app-skeleton height="24px" width="80%"></app-skeleton>
+                  </td>
+                }
+              </tr>
+            }
+          } @else {
+            @for (row of paginatedData(); track row.id) {
+              <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                @for (col of columns(); track col.key) {
+                  <td [class]="'p-4 align-middle [&:has([role=checkbox])]:pr-0 ' + (col.hideOnMobile ? 'hidden md:table-cell ' : '') + (col.hideOnSmall ? 'hidden sm:table-cell ' : '')">
+                    <ng-container *ngTemplateOutlet="cellTemplate() ? cellTemplate() : defaultCell; context: { $implicit: row, col: col }"></ng-container>
+                    <ng-template #defaultCell>
+                      {{ row[col.key] }}
+                    </ng-template>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td [attr.colspan]="columns().length" class="p-4 text-center text-muted-foreground whitespace-nowrap">
+                  No results.
                 </td>
-              }
-            </tr>
-          } @empty {
-            <tr>
-              <td [attr.colspan]="columns().length" class="p-4 text-center text-muted-foreground whitespace-nowrap">
-                No results.
-              </td>
-            </tr>
+              </tr>
+            }
           }
         </tbody>
       </table>
@@ -79,6 +93,10 @@ export class TableComponent {
   columns = input<{key: string, label: string, hideOnMobile?: boolean, hideOnSmall?: boolean}[]>([]);
   searchQuery = input<string>('');
   pageSize = input<number>(5);
+  isLoading = input<boolean>(false);
+  
+  skeletonRows = computed(() => Array.from({length: this.pageSize()}).map((_, i) => i));
+
   
   cellTemplate = contentChild<TemplateRef<any>>('cellTemplate');
 

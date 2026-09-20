@@ -6,13 +6,15 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+import { OnInit } from '@angular/core';
 
 type SettingsTab = 'profile' | 'security' | 'notifications' | 'billing';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, LucideDynamicIcon, CardComponent, CardContentComponent, CardHeaderComponent, CardTitleComponent, CardDescriptionComponent, ButtonComponent, BadgeComponent, FormsModule, ModalComponent],
+  imports: [CommonModule, LucideDynamicIcon, CardComponent, CardContentComponent, CardHeaderComponent, CardTitleComponent, CardDescriptionComponent, ButtonComponent, BadgeComponent, FormsModule, ModalComponent, SkeletonComponent],
   template: `
     <div class="flex-1 space-y-4">
 
@@ -47,7 +49,31 @@ type SettingsTab = 'profile' | 'security' | 'notifications' | 'billing';
 
         <!-- Content Area -->
         <main class="flex-1 min-w-0 space-y-6">
-
+          @if (isLoading()) {
+            <div class="grid gap-6">
+               <app-card>
+                 <app-card-header>
+                   <app-skeleton width="200px" height="24px"></app-skeleton>
+                   <app-skeleton width="300px" height="14px" className="mt-2"></app-skeleton>
+                 </app-card-header>
+                 <app-card-content className="space-y-6">
+                   <div class="flex items-center gap-6">
+                     <app-skeleton width="80px" height="80px" borderRadius="100%"></app-skeleton>
+                     <div class="space-y-3">
+                       <app-skeleton width="120px" height="32px"></app-skeleton>
+                       <app-skeleton width="200px" height="12px"></app-skeleton>
+                     </div>
+                   </div>
+                   <div class="space-y-6 pt-4">
+                     <app-skeleton width="100%" height="40px"></app-skeleton>
+                     <app-skeleton width="100%" height="40px"></app-skeleton>
+                     <app-skeleton width="100%" height="80px"></app-skeleton>
+                     <app-skeleton width="100%" height="40px"></app-skeleton>
+                   </div>
+                 </app-card-content>
+               </app-card>
+             </div>
+          } @else {
           @if (activeTab() === 'profile') {
             <!-- Profile Settings -->
             <div class="grid gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -358,7 +384,7 @@ type SettingsTab = 'profile' | 'security' | 'notifications' | 'billing';
               </app-card>
             </div>
           }
-
+          }
         </main>
       </div>
     </div>
@@ -446,10 +472,15 @@ type SettingsTab = 'profile' | 'security' | 'notifications' | 'billing';
 
   `
 })
-export class SettingsComponent {
+export class SettingsComponent implements OnInit {
 
   // Navigation State
   activeTab = signal<SettingsTab>('profile');
+  isLoading = signal(true);
+
+  ngOnInit() {
+    setTimeout(() => this.isLoading.set(false), 500);
+  }
 
   readonly tabs: { id: SettingsTab; label: string; icon: string }[] = [
     { id: 'profile', label: 'Profile', icon: 'user' },

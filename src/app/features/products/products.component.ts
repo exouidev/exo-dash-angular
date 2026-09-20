@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { CardComponent, CardContentComponent, CardHeaderComponent } from '../../shared/components/card/card.component';
@@ -7,17 +7,9 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+import { Product } from './products.model';
+import { ProductsService } from './products.service';
 
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  category: string;
-  price: number;
-  stock: number;
-  status: 'Active' | 'Draft' | 'Archived';
-  image: string;
-}
 
 @Component({
   selector: 'app-products',
@@ -109,6 +101,7 @@ interface Product {
 
         <app-card-content class="p-0">
           <app-table
+            [isLoading]="isLoading()"
             [data]="filteredProducts()"
             [columns]="columns"
             [searchQuery]="searchQuery()"
@@ -264,8 +257,7 @@ interface Product {
     </div>
   `
 })
-export class ProductsComponent {
-
+export class ProductsComponent implements OnInit {
 
   // Modal State
   isAddModalOpen = signal(false);
@@ -277,6 +269,17 @@ export class ProductsComponent {
   newProductStatus = signal<'Active' | 'Draft' | 'Archived'>('Draft');
 
   editingProductId = signal<string | null>(null);
+
+  products = signal<Product[]>([]);
+  isLoading = signal(true);
+  private productsService = inject(ProductsService);
+
+  ngOnInit() {
+    this.productsService.getProducts().subscribe(data => {
+      this.products.set(data);
+      this.isLoading.set(false);
+    });
+  }
 
   openAddModal() {
     this.editingProductId.set(null);
@@ -315,33 +318,23 @@ export class ProductsComponent {
 
     const editId = this.editingProductId();
     
+    const productData = {
+      name: this.newProductName(),
+      sku: this.newProductSKU(),
+      category: this.newProductCategory(),
+      price: this.newProductPrice(),
+      stock: this.newProductStock(),
+      status: this.newProductStatus() 
+    };
+
     if (editId) {
-      this.products.update(list => list.map(p => {
-        if (p.id === editId) {
-          return {
-            ...p,
-            name: this.newProductName(),
-            sku: this.newProductSKU(),
-            category: this.newProductCategory(),
-            price: this.newProductPrice(),
-            stock: this.newProductStock(),
-            status: this.newProductStatus() 
-          };
-        }
-        return p;
-      }));
+      // Optimistic update
+      this.products.update(list => list.map(p => p.id === editId ? { ...p, ...productData } : p));
+      this.productsService.saveProduct(productData, editId).subscribe();
     } else {
-      const newProd: Product = {
-        id: Math.random().toString(36).substring(2, 9),
-        name: this.newProductName(),
-        sku: this.newProductSKU(),
-        category: this.newProductCategory(),
-        price: this.newProductPrice(),
-        stock: this.newProductStock(),
-        status: this.newProductStatus(),
-        image: ''
-      };
-      this.products.update(list => [newProd, ...list]);
+      this.productsService.saveProduct(productData, null).subscribe(newProduct => {
+        this.products.update(list => [newProduct, ...list]);
+      });
     }
     
     this.closeAddModal();
@@ -363,19 +356,6 @@ export class ProductsComponent {
     { key: 'actions', label: 'Actions' }
   ];
 
-  // Mock Products Database
-  products = signal<Product[]>([
-    { id: '1', name: 'Premium Wireless Headphones', sku: 'AUDIO-001', category: 'Electronics', price: 299.99, stock: 45, status: 'Active', image: '' },
-    { id: '2', name: 'Mechanical Keyboard Pro', sku: 'COMP-042', category: 'Electronics', price: 149.50, stock: 8, status: 'Active', image: '' },
-    { id: '3', name: 'Ergonomic Office Chair', sku: 'FURN-015', category: 'Home & Garden', price: 199.00, stock: 0, status: 'Archived', image: '' },
-    { id: '4', name: 'USB-C Hub Multiport Adapter', sku: 'COMP-050', category: 'Accessories', price: 45.00, stock: 124, status: 'Active', image: '' },
-    { id: '5', name: 'Cotton Minimalist T-Shirt', sku: 'APP-012', category: 'Apparel', price: 24.00, stock: 200, status: 'Active', image: '' },
-    { id: '6', name: 'Smart Home Hub', sku: 'ELEC-993', category: 'Electronics', price: 129.99, stock: 23, status: 'Draft', image: '' },
-    { id: '7', name: 'Leather Messenger Bag', sku: 'ACC-082', category: 'Accessories', price: 89.00, stock: 4, status: 'Active', image: '' },
-    { id: '8', name: 'Desk Planter Set', sku: 'HOME-112', category: 'Home & Garden', price: 34.50, stock: 15, status: 'Draft', image: '' },
-  ]);
-
-  // Derived Signal computed by combining multiple constraints
   filteredProducts = computed(() => {
     let result = this.products();
 
@@ -388,8 +368,6 @@ export class ProductsComponent {
     if (this.selectedCategory() !== 'All Categories') {
       result = result.filter(p => p.category === this.selectedCategory());
     }
-
-    // (Global Search Filtering is handled automatically by passing searchQuery directly to the TableComponent)
 
     return result;
   });

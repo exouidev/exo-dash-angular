@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AnalyticsDataService } from '../../core/services/analytics-data.service';
+import { forkJoin } from 'rxjs';
+import { AnalyticsDataService, KPI, ActivityData, CategoryData, TableRow } from '../../core/services/analytics-data.service';
 import { StatCardComponent } from './components/stat-card/stat-card.component';
 import { RevenueChartComponent } from './components/revenue-chart/revenue-chart.component';
 import { CategoryChartComponent } from './components/category-chart/category-chart.component';
@@ -33,15 +34,15 @@ import { BadgeComponent } from '../../shared/components/badge/badge.component';
 
       <!-- KPI Cards -->
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        @for (kpi of dataService.kpis(); track kpi.id) {
-          <app-stat-card [stat]="kpi"></app-stat-card>
+        @for (kpi of kpis(); track kpi.id) {
+          <app-stat-card [stat]="kpi" [isLoading]="isLoading()"></app-stat-card>
         }
       </div>
 
       <!-- Charts -->
       <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
-        <app-revenue-chart class="lg:col-span-2 block min-w-0" [data]="dataService.activityData()"></app-revenue-chart>
-        <app-category-chart class="block min-w-0"></app-category-chart>
+        <app-revenue-chart class="lg:col-span-2 block min-w-0" [data]="activityData()" [isLoading]="isLoading()"></app-revenue-chart>
+        <app-category-chart class="block min-w-0" [isLoading]="isLoading()"></app-category-chart>
       </div>
 
       <!-- Recent Transactions Table -->
@@ -60,10 +61,11 @@ import { BadgeComponent } from '../../shared/components/badge/badge.component';
           </div>
 
           <app-table
-            [data]="dataService.recentTransactions()"
+            [data]="recentTransactions()"
             [columns]="tableColumns"
             [searchQuery]="searchQuery()"
             [pageSize]="5"
+            [isLoading]="isLoading()"
           >
             <!-- Define custom cell template for Status column -->
             <ng-template #cellTemplate let-row let-col="col">
@@ -83,8 +85,33 @@ import { BadgeComponent } from '../../shared/components/badge/badge.component';
     </div>
   `
 })
-export class DashboardComponent {
-  dataService = inject(AnalyticsDataService);
+export class DashboardComponent implements OnInit {
+  private dataService = inject(AnalyticsDataService);
+
+  kpis = signal<KPI[]>([
+    { id: '1', label: 'Total Revenue', value: '', trend: 0, icon: 'dollar-sign' },
+    { id: '2', label: 'Subscriptions', value: '', trend: 0, icon: 'users' },
+    { id: '3', label: 'Sales', value: '', trend: 0, icon: 'credit-card' },
+    { id: '4', label: 'Active Now', value: '', trend: 0, icon: 'activity' }
+  ]);
+  activityData = signal<ActivityData[]>([]);
+  recentTransactions = signal<TableRow[]>([]);
+
+  isLoading = signal(true);
+
+  ngOnInit() {
+    forkJoin({
+      kpis: this.dataService.getKpis(),
+      activity: this.dataService.getActivityData(),
+      transactions: this.dataService.getRecentTransactions()
+    }).subscribe(({kpis, activity, transactions}) => {
+      this.kpis.set(kpis);
+      this.activityData.set(activity);
+      this.recentTransactions.set(transactions);
+      this.isLoading.set(false);
+    });
+  }
+
 
   tableColumns = [
     { key: 'id', label: 'ID' },

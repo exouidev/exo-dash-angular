@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { UserService, User } from '../../core/services/user.service';
@@ -8,6 +8,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
+
 
 @Component({
   selector: 'app-users',
@@ -46,7 +47,7 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
       <app-card>
         <app-card-header class="pb-3 border-b">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <app-card-title>All Users ({{ userService.totalUsersCount() }})</app-card-title>
+            <app-card-title>All Users @if (isLoading()) { <span class="inline-block animate-pulse w-6 h-5 rounded bg-primary/10 align-middle ml-1"></span> } @else { ({{ totalUsersCount() }}) }</app-card-title>
 
             <div class="flex items-center gap-2 w-full sm:w-auto">
               <div class="relative flex-1 sm:w-64 z-10">
@@ -69,7 +70,8 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
 
         <app-card-content class="p-0">
           <app-table
-            [data]="userService.users()"
+            [isLoading]="isLoading()"
+            [data]="users()"
             [columns]="columns"
             [searchQuery]="searchQuery()"
             [pageSize]="5">
@@ -233,10 +235,21 @@ import { ModalComponent } from '../../shared/components/modal/modal.component';
     </div>
   `
 })
-export class UsersComponent {
+export class UsersComponent implements OnInit {
   userService = inject(UserService);
 
   searchQuery = signal('');
+  users = signal<User[]>([]);
+  isLoading = signal(true);
+
+  totalUsersCount = computed(() => this.users().length);
+
+  ngOnInit() {
+    this.userService.getUsers().subscribe(data => {
+      this.users.set(data);
+      this.isLoading.set(false);
+    });
+  }
 
   columns = [
     { key: 'user', label: 'User' },
@@ -256,7 +269,7 @@ export class UsersComponent {
 
   isUserModalOpen = signal(false);
   editingUserId = signal<string | null>(null);
-  
+
   newUserName = signal('');
   newUserEmail = signal('');
   newUserRole = signal<'Admin' | 'Manager' | 'Member'>('Member');
@@ -270,7 +283,8 @@ export class UsersComponent {
   confirmDelete() {
     const user = this.userToDelete();
     if (user) {
-      this.userService.deleteUser(user.id);
+      this.users.update(list => list.filter(u => u.id !== user.id)); // optimistic
+      this.userService.deleteUser(user.id).subscribe();
     }
     this.isDeleteModalOpen.set(false);
   }
@@ -310,16 +324,18 @@ export class UsersComponent {
     const editId = this.editingUserId();
     if (editId) {
       // Edit
-      const orig = this.userService.users().find(u => u.id === editId);
+      const orig = this.users().find(u => u.id === editId);
       if (orig) {
-        this.userService.updateUser({
+        const updated = {
           ...orig,
           name: this.newUserName(),
           email: this.newUserEmail(),
           role: this.newUserRole(),
           status: this.newUserStatus(),
           avatar: initials
-        });
+        };
+        this.users.update(list => list.map(u => u.id === editId ? updated : u)); // optimistic
+        this.userService.updateUser(updated).subscribe();
       }
     } else {
       // Add
@@ -332,7 +348,8 @@ export class UsersComponent {
         lastActivity: 'Just now',
         avatar: initials
       };
-      this.userService.addUser(newUser);
+      this.users.update(list => [newUser, ...list]);
+      this.userService.addUser(newUser).subscribe();
     }
     this.closeUserModal();
   }
