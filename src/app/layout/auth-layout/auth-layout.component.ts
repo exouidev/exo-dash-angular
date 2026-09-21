@@ -1,17 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { signal } from '@angular/core';
 @Component({
   selector: 'app-auth-layout',
   standalone: true,
   imports: [RouterModule],
+  host: {
+    class: 'block w-full min-h-screen'
+  },
   template: `
     <div class="flex min-h-screen grid-cols-2 lg:grid w-full">
 
       
 
       <!-- Left Branding Panel (Hidden on smaller screens) -->
-      <div class="relative hidden lg:flex flex-col justify-between p-10 text-white overflow-hidden">
+      <div class="relative hidden lg:flex flex-col justify-between p-10 text-white overflow-hidden pt-24">
         <!-- Background Image & Overlay -->
         <div class="absolute inset-0 bg-zinc-900">
           <img
@@ -46,9 +49,9 @@ import { signal } from '@angular/core';
       </div>
 
       <!-- Right Auth Panel -->
-      <div class="relative flex flex-col justify-center items-center p-8 bg-background w-full">
+      <div class="relative flex flex-col justify-center items-center p-8 bg-background w-full pt-28">
         <!-- Mobile Branding -->
-        <div class="absolute top-8 left-8 lg:hidden flex items-center text-lg font-medium">
+        <div class="absolute top-24 left-8 lg:hidden flex items-center text-lg font-medium">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -71,7 +74,7 @@ import { signal } from '@angular/core';
       </div>
 
       </div>
-  `
+    `
 })
 export class AuthLayoutComponent {
   }
